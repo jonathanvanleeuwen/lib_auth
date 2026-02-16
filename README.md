@@ -9,6 +9,33 @@ A Python library with modern CI/CD setup.
 * Automatic wheel build and GitHub Release publishing
 * Modern Python packaging with pyproject.toml
 
+## Installation
+
+**Install newest version:**
+```bash
+uv pip install "git+https://github.com/jonathanvanleeuwen/lib_auth.git"
+```
+**Install specific version:**
+```bash
+uv pip install "git+https://github.com/jonathanvanleeuwen/lib_auth.git@v1.0.1"
+```
+
+**Add to `pyproject.toml`:**
+The @version is optional, but recommended (choose the newest version first!)
+
+```toml
+[project]
+dependencies = [
+    "lib_auth @ git+https://github.com/jonathanvanleeuwen/lib_auth.git@v1.0.1",
+]
+```
+
+**Add to `requirements.txt`:**
+The @version is optional, but recommended (choose the newest version first!)
+```text
+lib_auth @ git+https://github.com/jonathanvanleeuwen/lib_auth.git@v1.1.0
+```
+
 ## Usage
 
 `lib_auth` provides authentication for FastAPI applications using **API keys** and/or **OAuth 2.0** (GitHub, Google).
