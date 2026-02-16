@@ -1,19 +1,15 @@
 import logging
-from collections.abc import Callable
 from typing import Any
 
-from fastapi import Depends, HTTPException, Request, Security, status
+from fastapi import HTTPException, Request, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from lib_auth.auth.oauth_auth import verify_access_token
-from lib_auth.settings import Settings
-from lib_auth.settings import get_settings
 from lib_auth.utils.auth_utils import hash_api_key
 
 logger = logging.getLogger(__name__)
 bearer_scheme = HTTPBearer(auto_error=False)
 _security_bearer = Security(bearer_scheme)
-_depends_settings = Depends(get_settings)
 
 
 def _check_roles(user_roles: list[str], allowed_roles: list[str] | None) -> None:
@@ -26,16 +22,16 @@ def _check_roles(user_roles: list[str], allowed_roles: list[str] | None) -> None
 
 def _try_api_key_auth(
     token: str,
-    settings: Settings,
+    api_keys: dict[str, dict[str, Any]],
     allowed_roles: list[str] | None,
 ) -> dict[str, Any] | None:
     hashed_token = hash_api_key(token)
-    user_info = settings.api_keys.get(hashed_token)
+    user_info = api_keys.get(hashed_token)
     if not user_info:
         return None
 
     username = user_info.get("username")
-    roles = user_info.get("roles", [])
+    roles = list(user_info.get("roles", []))
     _check_roles(roles, allowed_roles)
 
     return {
@@ -47,12 +43,22 @@ def _try_api_key_auth(
 
 def _try_oauth_auth(
     token: str,
+    oauth_secret_key: str,
     allowed_roles: list[str] | None,
 ) -> dict[str, Any] | None:
-    payload = verify_access_token(token)
+    try:
+        payload = verify_access_token(token, secret_key=oauth_secret_key)
+    except HTTPException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+            detail="OAuth authentication failed",
+            headers={"Location": "/static/"},
+        ) from exc
+
     user_email = payload.get("sub")
     if not user_email:
         return None
+
     roles = payload.get("roles", [])
     _check_roles(roles, allowed_roles)
     return {
@@ -63,27 +69,32 @@ def _try_oauth_auth(
     }
 
 
-def create_auth(allowed_roles: list[str] | None = None) -> Callable:
+def create_auth(
+    api_keys: dict[str, dict[str, Any]],
+    oauth_secret_key: str,
+    allowed_roles: list[str] | None = None,
+) -> Any:
     async def bearer_auth(
         request: Request,
         credentials: HTTPAuthorizationCredentials = _security_bearer,
-        settings: Settings = _depends_settings,
     ) -> dict[str, Any]:
-        if credentials is None or credentials.scheme.lower() != "bearer":
+        if not credentials or credentials.scheme.lower() != "bearer":
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or missing Authorization header",
+                status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+                detail="Authentication required",
+                headers={"Location": "/static/"},
             )
 
         token = credentials.credentials
-        user_info = _try_api_key_auth(token, settings, allowed_roles)
-        if user_info is None:
-            user_info = _try_oauth_auth(token, allowed_roles)
+        user_info = _try_api_key_auth(token, api_keys, allowed_roles)
+        if not user_info:
+            user_info = _try_oauth_auth(token, oauth_secret_key, allowed_roles)
 
-        if user_info is None:
+        if not user_info:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=status.HTTP_307_TEMPORARY_REDIRECT,
                 detail="Invalid authentication credentials",
+                headers={"Location": "/static/"},
             )
 
         request.state.user_info = user_info
@@ -91,8 +102,3 @@ def create_auth(allowed_roles: list[str] | None = None) -> Callable:
         return user_info
 
     return bearer_auth
-
-
-auth_admin = create_auth(allowed_roles=["admin"])
-auth_user = create_auth(allowed_roles=["admin", "user"])
-auth_any = create_auth()

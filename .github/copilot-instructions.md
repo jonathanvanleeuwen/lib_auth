@@ -98,6 +98,45 @@
 - Execute with: `pytest` (picks up config from pyproject.toml)
 - Coverage reports generated in `reports/htmlcov/`
 
+**Test Organization**
+- **Unit tests** (`tests/unit/`): Test individual functions/classes in isolation
+  - No HTTP calls, no FastAPI TestClient
+  - Test pure logic: token operations, hashing, role resolution, provider config
+  - Fast, focused, deterministic
+  - File naming: `test_<module_name>.py` (e.g., `test_token_operations.py`)
+  
+- **Integration tests** (`tests/integration/`): Test components working together
+  - Use FastAPI TestClient for HTTP interactions
+  - Test full authentication flows, OAuth routers, endpoints
+  - Mock external dependencies (OAuth provider APIs)
+  - File naming: `test_<feature>.py` (e.g., `test_auth_dependency.py`, `test_oauth_router.py`)
+
+- **Fixtures** (`conftest.py`): Shared test fixtures and configuration
+  - Create fixtures for common test data (settings, API keys, mock requests)
+  - Keep fixtures reusable and well-documented
+  - Use `@pytest.fixture` decorator
+
+**Test Quality Standards**
+- **Readable**: Test names describe what is being tested (e.g., `test_api_key_auth_admin_access`)
+- **Isolated**: Each test is independent, can run in any order
+- **Focused**: One assertion per concept, multiple assertions per test is fine if related
+- **Coverage**: Aim for >90% code coverage
+- **Organized**: Group related tests in the same file
+  - Token creation/verification → `test_token_operations.py`
+  - API key hashing → `test_api_key_utils.py`
+  - OAuth providers → `test_oauth_providers.py`
+  - Full auth flows → `test_auth_dependency.py`
+
+**Running Tests**
+```bash
+pytest                               # Run all tests with coverage
+pytest tests/unit/                   # Run only unit tests
+pytest tests/integration/            # Run only integration tests
+pytest tests/unit/test_token_operations.py  # Run specific test file
+pytest -k "test_api_key"            # Run tests matching pattern
+pytest -v                            # Verbose output
+```
+
 ### Documentation Requirements
 
 **Always Update README.md**
