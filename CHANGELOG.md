@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.0.3 (2026-02-16)
+
+### Bug Fixes
+
+- Added logging
+  ([`46df952`](https://github.com/jonathanvanleeuwen/lib_auth/commit/46df952ee7d278f80d3b92a4bd7d8fdf65dda31f))
+
+### Chores
+
+- Update wheel to latest version [skip ci]
+  ([`3274c68`](https://github.com/jonathanvanleeuwen/lib_auth/commit/3274c682c6225cf516e60a24113bb073c639c566))
+
+### Documentation
+
+- Update coverage report in README [skip ci]
+  ([`abf81d4`](https://github.com/jonathanvanleeuwen/lib_auth/commit/abf81d4bee00063c47bfd0ca5b12f2beccad8112))
+
+
 ## v1.0.2 (2026-02-16)
 
 ### Bug Fixes
