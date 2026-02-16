@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Awaitable, Callable
 
 from fastapi import APIRouter
@@ -14,6 +15,8 @@ from lib_auth.workers.oauth_service import (
     extract_user_email,
     get_user_info_from_provider,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_oauth_router(
@@ -96,6 +99,12 @@ def create_oauth_router(
             roles=user_roles,
             secret_key=oauth_secret_key,
             expire_minutes=oauth_access_token_expire_minutes,
+        )
+        logger.info(
+            "OAuth login successful: provider=%s user=%s roles=%s",
+            oauth_provider,
+            user_email,
+            user_roles,
         )
         return TokenResponse(access_token=access_token)
 

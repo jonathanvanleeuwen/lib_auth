@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import inspect
+import logging
 from collections.abc import Awaitable, Callable
+
+logger = logging.getLogger(__name__)
 
 
 def hash_api_key(api_key: str) -> str:
@@ -22,5 +25,9 @@ async def resolve_user_roles(
     if inspect.isawaitable(roles):
         roles = await roles
     if not roles:
+        logger.debug(
+            "No roles resolved for user=%s, defaulting to ['user']", user_email
+        )
         return ["user"]
+    logger.debug("Resolved roles for user=%s: %s", user_email, roles)
     return roles

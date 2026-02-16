@@ -296,6 +296,81 @@ def get_user_documents(request: Request):
 
 ---
 
+### Logging
+
+`lib_auth` uses Python's standard `logging` module to provide visibility into authentication events. Configure logging in your application to control what you see.
+
+#### Log Levels
+
+- **INFO**: Successful authentication events (logins)
+- **DEBUG**: Detailed authentication flow (token operations, role resolution)
+- **WARNING**: Failed authentication attempts
+- **ERROR**: OAuth provider errors and token exchange failures
+
+#### Example Logging Configuration
+
+```python
+import logging
+
+# Basic console logging (development)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+# For production - log only INFO and above (avoids verbose DEBUG logs)
+logging.getLogger("lib_auth").setLevel(logging.INFO)
+
+# For debugging authentication issues
+logging.getLogger("lib_auth").setLevel(logging.DEBUG)
+
+# Disable lib_auth logging completely
+logging.getLogger("lib_auth").setLevel(logging.CRITICAL)
+```
+
+#### What Gets Logged
+
+**Successful API Key Login (INFO):**
+```
+INFO - lib_auth.auth.authentication - API key authentication successful: user=alice roles=['admin', 'user']
+```
+
+**Successful OAuth Login (INFO):**
+```
+INFO - lib_auth.routers.oauth - OAuth login successful: provider=github user=alice@example.com roles=['user']
+```
+
+**Failed Authentication (WARNING):**
+```
+WARNING - lib_auth.auth.authentication - Authentication failed: invalid credentials
+```
+
+**OAuth Provider Error (ERROR):**
+```
+ERROR - lib_auth.workers.oauth_service - Failed to exchange code for token: provider=github error=...
+```
+
+**Debug Flow (DEBUG - only when DEBUG level enabled):**
+```
+DEBUG - lib_auth.auth.authentication - Attempting API key authentication
+DEBUG - lib_auth.auth.authentication - API key not found in configured keys
+DEBUG - lib_auth.auth.authentication - Attempting OAuth token authentication
+DEBUG - lib_auth.auth.oauth_auth - Verified access token: user=alice@example.com provider=github
+DEBUG - lib_auth.utils.auth_utils - Resolved roles for user=alice@example.com: ['user']
+```
+
+#### Avoiding Log Spam
+
+The library is designed to minimize duplicate logs during normal operation:
+- **One log per successful login**: Either API key OR OAuth, not both
+- **Token verification**: Only logged at DEBUG level (not INFO)
+- **Role resolution**: Only logged at DEBUG level
+- **OAuth flow**: INFO level only for complete login, DEBUG for intermediate steps
+
+For high-traffic applications, keep logging at INFO level to see successful authentications without overwhelming logs with per-request token verifications.
+
+---
+
 ### Custom Role Resolution (Advanced)
 
 By default, OAuth users get the `"user"` role. You can look up roles from a database:
