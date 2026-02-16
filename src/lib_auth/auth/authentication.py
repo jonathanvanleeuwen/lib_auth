@@ -25,15 +25,18 @@ def _try_api_key_auth(
     api_keys: dict[str, dict[str, Any]],
     allowed_roles: list[str] | None,
 ) -> dict[str, Any] | None:
+    logger.debug("Attempting API key authentication")
     hashed_token = hash_api_key(token)
     user_info = api_keys.get(hashed_token)
     if not user_info:
+        logger.debug("API key not found in configured keys")
         return None
 
     username = user_info.get("username")
     roles = list(user_info.get("roles", []))
     _check_roles(roles, allowed_roles)
 
+    logger.info("API key authentication successful: user=%s roles=%s", username, roles)
     return {
         "sub": username,
         "auth_type": "api_key",
@@ -46,9 +49,11 @@ def _try_oauth_auth(
     oauth_secret_key: str,
     allowed_roles: list[str] | None,
 ) -> dict[str, Any] | None:
+    logger.debug("Attempting OAuth token authentication")
     try:
         payload = verify_access_token(token, secret_key=oauth_secret_key)
     except HTTPException as exc:
+        logger.debug("OAuth token verification failed: %s", exc.detail)
         raise HTTPException(
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,
             detail="OAuth authentication failed",
@@ -57,14 +62,22 @@ def _try_oauth_auth(
 
     user_email = payload.get("sub")
     if not user_email:
+        logger.warning("OAuth token missing 'sub' claim")
         return None
 
     roles = payload.get("roles", [])
     _check_roles(roles, allowed_roles)
+    provider = payload.get("provider", "unknown")
+    logger.info(
+        "OAuth authentication successful: user=%s provider=%s roles=%s",
+        user_email,
+        provider,
+        roles,
+    )
     return {
         "sub": user_email,
         "auth_type": "oauth",
-        "provider": payload.get("provider", "unknown"),
+        "provider": provider,
         "roles": roles,
     }
 
@@ -91,6 +104,7 @@ def create_auth(
             user_info = _try_oauth_auth(token, oauth_secret_key, allowed_roles)
 
         if not user_info:
+            logger.warning("Authentication failed: invalid credentials")
             raise HTTPException(
                 status_code=status.HTTP_307_TEMPORARY_REDIRECT,
                 detail="Invalid authentication credentials",

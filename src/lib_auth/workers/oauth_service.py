@@ -41,6 +41,7 @@ async def exchange_code_for_provider_token(
     client_secret: str,
     redirect_uri: str,
 ) -> str:
+    logger.debug("Exchanging OAuth code for access token: provider=%s", provider)
     oauth_config = get_oauth_config(provider)
     token_data = {
         "client_id": client_id,
@@ -60,7 +61,11 @@ async def exchange_code_for_provider_token(
             response.raise_for_status()
             oauth_tokens = response.json()
         except httpx.HTTPError as exc:
-            logger.error("Failed to exchange code for token: %s", exc)
+            logger.error(
+                "Failed to exchange code for token: provider=%s error=%s",
+                provider,
+                exc,
+            )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Failed to exchange authorization code",
@@ -81,6 +86,7 @@ async def get_user_info_from_provider(
     provider: str,
     provider_access_token: str,
 ) -> dict[str, Any]:
+    logger.debug("Fetching user info from OAuth provider: provider=%s", provider)
     oauth_config = get_oauth_config(provider)
 
     async with httpx.AsyncClient() as client:
@@ -121,9 +127,14 @@ async def get_user_info_from_provider(
                 if primary_email:
                     user_info["email"] = primary_email
 
+            logger.debug(
+                "Retrieved user info from provider: provider=%s email=%s",
+                provider,
+                user_info.get("email", "N/A"),
+            )
             return user_info
         except httpx.HTTPError as exc:
-            logger.error("Failed to get user info: %s", exc)
+            logger.error("Failed to get user info: provider=%s error=%s", provider, exc)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Failed to retrieve user information",
