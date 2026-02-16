@@ -104,7 +104,7 @@
   - Test pure logic: token operations, hashing, role resolution, provider config
   - Fast, focused, deterministic
   - File naming: `test_<module_name>.py` (e.g., `test_token_operations.py`)
-  
+
 - **Integration tests** (`tests/integration/`): Test components working together
   - Use FastAPI TestClient for HTTP interactions
   - Test full authentication flows, OAuth routers, endpoints
