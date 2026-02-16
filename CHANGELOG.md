@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.0.2 (2026-02-16)
+
+### Bug Fixes
+
+- Update readme
+  ([`ab377aa`](https://github.com/jonathanvanleeuwen/lib_auth/commit/ab377aa09e77edfa4ff48bee7753461156e91bdd))
+
+### Chores
+
+- Update wheel to latest version [skip ci]
+  ([`1a0bb1c`](https://github.com/jonathanvanleeuwen/lib_auth/commit/1a0bb1c4ac847d88157cd5495b30dd5377949351))
+
+
 ## v1.0.1 (2026-02-16)
 
 ### Bug Fixes
