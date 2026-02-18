@@ -1,6 +1,30 @@
 # lib_auth - AI Coding Agent Instructions
 
 ---
+## ⚠️ CRITICAL: Mandatory Code Standards Enforcement
+
+**ALL code changes MUST strictly adhere to the following principles. No exceptions.**
+
+When implementing any feature, refactoring, or making changes:
+
+1. ✅ **ELIMINATE DUPLICATION** - If you see identical or similar code blocks, extract them into shared utilities
+2. ✅ **MINIMAL IMPORTS** - `__init__.py` files should be empty or contain only version info. Never import modules just to re-export them
+3. ✅ **DRY (Don't Repeat Yourself)** - Extract common patterns into reusable functions immediately
+4. ✅ **CLEAN Code** - Every function does ONE thing. If it does multiple things, split it
+5. ✅ **NO COMMENTED CODE** - Delete it. Git history exists for a reason
+6. ✅ **EXPLICIT IMPORTS** - Always import from the actual module, never from `__init__.py`
+7. ✅ **PRODUCTION READY** - Code must be robust, tested, and maintainable from day one
+
+**Before submitting any code:**
+- Scan for duplicate logic across files
+- Check all `__init__.py` files are minimal
+- Verify functions are focused and single-purpose
+- Ensure no commented-out code exists
+- Confirm all imports are explicit and necessary
+
+**Violation of these principles requires immediate refactoring.**
+
+---
 ## 📋 Generic Code Standards (Reusable Across All Projects)
 
 ### Code Quality Principles

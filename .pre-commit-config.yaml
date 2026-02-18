@@ -10,6 +10,7 @@ repos:
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: detect-private-key
+        exclude: ^tests/.*|README\.md$
       - id: no-commit-to-branch
         args: ["--branch", "main"]
 
