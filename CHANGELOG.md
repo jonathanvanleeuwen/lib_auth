@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v1.1.0 (2026-02-18)
+
+### Chores
+
+- Update wheel to latest version [skip ci]
+  ([`5a4fb4f`](https://github.com/jonathanvanleeuwen/lib_auth/commit/5a4fb4f2e856b5a70de0482d194e7c2401dbbdda))
+
+### Documentation
+
+- Update coverage report in README [skip ci]
+  ([`3baa922`](https://github.com/jonathanvanleeuwen/lib_auth/commit/3baa922a8fe2c5865ada420b84a6e586f4cf472f))
+
+### Features
+
+- Added service to service auth for azure google and github
+  ([`95b231c`](https://github.com/jonathanvanleeuwen/lib_auth/commit/95b231c269af02faff0c4bbf45377ab30822c275))
+
+
 ## v1.0.3 (2026-02-16)
 
 ### Bug Fixes
